@@ -194,36 +194,26 @@ static void check_is_string(struct check *c, struct dt_info *dti,
 #define ERROR_IF_NOT_STRING(nm, propname) \
 	ERROR(nm, check_is_string, (propname))
 
-static void check_is_string_list(struct check *c, struct dt_info *dti,
-				 struct node *node)
+static void check_is_null_terminated(struct check *c, struct node *root,
+			    struct node *node)
 {
-	int rem, l;
 	struct property *prop;
 	char *propname = c->data;
-	char *str;
 
 	prop = get_property(node, propname);
 	if (!prop)
 		return; /* Not present, assumed ok */
 
-	str = prop->val.val;
-	rem = prop->val.len;
-	while (rem > 0) {
-		l = strnlen(str, rem);
-		if (l == rem) {
-			FAIL_PROP(c, dti, node, prop, "property is not a string list");
-			break;
-		}
-		rem -= l + 1;
-		str += l + 1;
-	}
+	if (prop->val.val[prop->val.len-1] != '\0')
+		FAIL(c, "\"%s\" property in %s is not null terminated",
+		     propname, node->fullpath);
 }
-#define WARNING_IF_NOT_STRING_LIST(nm, propname) \
-	WARNING(nm, check_is_string_list, (propname))
-#define ERROR_IF_NOT_STRING_LIST(nm, propname) \
-	ERROR(nm, check_is_string_list, (propname))
+#define WARNING_IF_NOT_NULL_TERMINATED(nm, propname) \
+	WARNING(nm, NULL, check_is_null_terminated, NULL, (propname))
+#define ERROR_IF_NOT_NULL_TERMINATED(nm, propname) \
+	ERROR(nm, NULL, check_is_null_terminated, NULL, (propname))
 
-static void check_is_cell(struct check *c, struct dt_info *dti,
+static void check_is_cell(struct check *c, struct node *root,
 			  struct node *node)
 {
 	struct property *prop;
@@ -640,8 +630,7 @@ WARNING_IF_NOT_CELL(interrupt_cells_is_cell, "#interrupt-cells");
 
 WARNING_IF_NOT_STRING(device_type_is_string, "device_type");
 WARNING_IF_NOT_STRING(model_is_string, "model");
-WARNING_IF_NOT_STRING(status_is_string, "status");
-WARNING_IF_NOT_STRING(label_is_string, "label");
+WARNING_IF_NOT_NULL_TERMINATED(status_is_null_terminated, "status");
 
 WARNING_IF_NOT_STRING_LIST(compatible_is_string_list, "compatible");
 
@@ -1562,13 +1551,7 @@ static struct check *check_table[] = {
 	&omit_unused_nodes,
 
 	&address_cells_is_cell, &size_cells_is_cell, &interrupt_cells_is_cell,
-	&device_type_is_string, &model_is_string, &status_is_string,
-	&label_is_string,
-
-	&compatible_is_string_list, &names_is_string_list,
-
-	&property_name_chars_strict,
-	&node_name_chars_strict,
+	&device_type_is_string, &model_is_string, &status_is_null_terminated,
 
 	&addr_size_cells, &reg_format, &ranges_format,
 
