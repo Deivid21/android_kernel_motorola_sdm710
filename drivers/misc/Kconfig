@@ -852,6 +852,7 @@ config MOT_UTAG
 	  and modified.
 
 source "drivers/misc/c2port/Kconfig"
+source "drivers/misc/awinic/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
 source "drivers/misc/ti-st/Kconfig"
