@@ -26,11 +26,13 @@ struct msm_cci_intf_register {
 };
 
 struct msm_cci_intf_data {
-	unsigned short count; /* between 1 and MSM_CCI_INTF_MAX_XFER */
-	unsigned char  buf[MSM_CCI_INTF_MAX_XFER];
+	unsigned short count; /* between 1 and CCI_INTF_MAX_XFER */
+	unsigned short width;
+	uint8_t buf[MSM_CCI_INTF_MAX_XFER];
 };
 
 struct msm_cci_intf_xfer {
+	unsigned short cci_device;  /* 0 = DEVICE_0, 1 = DEVICE_1 */
 	unsigned short cci_bus;     /* 0 = MASTER_0, 1 = MASTER_1 */
 	unsigned short slave_addr;  /* 7-bit addr of intended device */
 	struct msm_cci_intf_register  reg;
@@ -47,13 +49,4 @@ struct msm_cci_intf_xfer {
 #define MSM_CCI_INTF_WRITE32 \
 	_IOWR('X', BASE_VIDIOC_PRIVATE + 51, struct msm_cci_intf_xfer)
 
-#define MSM_CCI_INTF_INIT \
-	_IOWR('X', BASE_VIDIOC_PRIVATE + 52, struct msm_cci_intf_xfer)
-#define MSM_CCI_INTF_INIT32 \
-	_IOWR('X', BASE_VIDIOC_PRIVATE + 52, struct msm_cci_intf_xfer)
-
-#define MSM_CCI_INTF_RELEASE \
-	_IOWR('X', BASE_VIDIOC_PRIVATE + 53, struct msm_cci_intf_xfer)
-#define MSM_CCI_INTF_RELEASE32 \
-	_IOWR('X', BASE_VIDIOC_PRIVATE + 53, struct msm_cci_intf_xfer)
 #endif
