@@ -51,7 +51,7 @@ ifeq ($(KERNEL_BUILD), 0)
 		export
 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
 	endif
-	ifneq (,$(filter astro%, $(TARGET_PRODUCT)))
+	ifeq ($(CONFIG_ASTRO_DTB), y)
 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm710astroconf.h
 	endif
 endif

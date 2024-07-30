@@ -57,7 +57,7 @@ ifeq ($(KERNEL_BUILD), 0)
 		export
 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
 	endif
-	ifneq (,$(filter astro%, $(TARGET_PRODUCT)))
+	ifeq ($(CONFIG_ASTRO_DTB), y)
 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm710astroconf.h
 	endif
 endif
@@ -101,7 +101,7 @@ else
 EXTRA_CFLAGS += -DCONFIG_SND_SOC_CS47L90
 endif
 
-ifneq (,$(filter racerl%,$(TARGET_PRODUCT)))
+ifeq ($(CONFIG_RACERL_DTB), y)
 EXTRA_CFLAGS += -DCONFIG_SND_SOC_CS35L41_STEREO -DCONFIG_PRODUCT_RACERL
 endif
 
