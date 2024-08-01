@@ -1,0 +1,4 @@
+config NFC_I2C_DVR
+	tristate "QTI NFC I2C driver"
+	---help---
+	  QTI NFC I2C driver controller support

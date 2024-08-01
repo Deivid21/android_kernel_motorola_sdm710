@@ -1,0 +1,4 @@
+config MMI_NFC_CLK
+	tristate "Motorola Mobiity NFC Clock Enable/Disable driver"
+	---help---
+	  Motorola Mobiity NFC Clock Enable/Disable controller support

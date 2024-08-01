@@ -1,11 +1,6 @@
-KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
+#
+# Makefile for QTI NFC I2C based NFC driver
+#
 
-all:
-	$(MAKE) -C $(KERNEL_SRC) M=$(shell pwd) modules $(KBUILD_OPTIONS)
-
-modules_install:
-	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(shell pwd) modules_install
-
-clean:
-	$(MAKE) -C $(KERNEL_SRC) M=$(PWD) clean
-
+obj-$(CONFIG_NFC_I2C_DVR)     += nfc_i2c.o
+nfc_i2c-objs:= nfc_common.o nfc_i2c_drv.o
