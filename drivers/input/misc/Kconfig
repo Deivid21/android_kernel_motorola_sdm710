@@ -897,4 +897,5 @@ config INPUT_MMI_KEY_SWAP
 	  To compile this driver as a module, choose M here: the
 	  module will be called key_swap.
 
+source "drivers/input/misc/fpc_fps_mmi/Kconfig"
 endif
