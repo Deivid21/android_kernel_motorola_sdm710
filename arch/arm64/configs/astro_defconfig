@@ -4657,6 +4657,7 @@ CONFIG_QCOM_QFPROM=y
 # FPGA Configuration Support
 #
 # CONFIG_FPGA is not set
+CONFIG_SENSORS=y
 CONFIG_SENSORS_SSC=y
 # CONFIG_TEE is not set
 
