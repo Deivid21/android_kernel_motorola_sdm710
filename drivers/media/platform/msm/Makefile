@@ -15,3 +15,4 @@ obj-$(CONFIG_MSMB_CAMERA) += camera_v2/
 obj-y += broadcast/
 obj-$(CONFIG_DVB_MPQ) += dvb/
 obj-$(CONFIG_QCA402X) += qca402/
+obj-$(CONFIG_CAMERA_CCI_DEBUG_INTF) += camera/cam_sensor_module/cam_cci/
