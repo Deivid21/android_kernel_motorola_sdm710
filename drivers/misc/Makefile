@@ -68,6 +68,8 @@ obj-$(CONFIG_SARSENSOR_SX933X) += sx933x_sar.o
 obj-$(CONFIG_SARSENSOR_SX937X) += sx937x_sar.o
 obj-$(CONFIG_SARSENSOR_SX9310) += sx9310_triple.o
 obj-$(CONFIG_SARSENSOR_SX9325) += sx9325_sar.o
+EXTRA_CFLAGS += -DCONFIG_CAPSENSE_USB_CAL
+
 obj-$(CONFIG_UID_SYS_STATS)	+= uid_sys_stats.o
 obj-$(CONFIG_MEMORY_STATE_TIME)	+= memory_state_time.o
 obj-$(CONFIG_QCOM_XR_SMRTVWR_MISC) += qcom-xr-smrtvwr-misc.o
