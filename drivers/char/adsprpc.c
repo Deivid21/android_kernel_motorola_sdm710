@@ -362,10 +362,8 @@ struct fastrpc_mmap {
 	int uncached;
 	int secure;
 	uintptr_t attr;
-	bool is_filemap; /* flag to indicate map used in process init */
+	bool is_filemap; /*flag to indicate map used in process init*/
 	unsigned int ctx_refs; /* Indicates reference count for context map */
-	/* Map in use for dma handle */
-	unsigned int dma_handle_refs;
 };
 
 enum fastrpc_perfkeys {
@@ -711,9 +709,7 @@ static int fastrpc_mmap_remove(struct fastrpc_file *fl, uintptr_t va,
 	}
 	hlist_for_each_entry_safe(map, n, &fl->maps, hn) {
 		/* Remove if only one reference map and no context map */
-		if (map->refs == 1 &&
-			!map->ctx_refs &&
-			map->raddr == va &&
+		if (map->refs == 1 && !map->ctx_refs &&  map->raddr == va &&
 			map->raddr + map->len == va + len &&
 			/* Remove map only if it isn't being used by DSP */
 			!map->dma_handle_refs &&
@@ -761,21 +757,15 @@ static void fastrpc_mmap_free(struct fastrpc_mmap *map, uint32_t flags)
 	if (map->flags == ADSP_MMAP_HEAP_ADDR ||
 				map->flags == ADSP_MMAP_REMOTE_HEAP_ADDR) {
 		spin_lock(&me->hlock);
-		if (map->refs)
-			map->refs--;
-		if (!map->refs)
+		map->refs--;
+		if (!map->refs && !map->ctx_refs)
 			hlist_del_init(&map->hn);
 		spin_unlock(&me->hlock);
 		if (map->refs > 0)
 			return;
 	} else {
-		if (map->refs)
-			map->refs--;
-		/* flags is passed as 1 during fastrpc_file_free
-		 * (ie process exit), so that maps will be cleared
-		 * even though references are present.
-		 */
-		if (!map->refs && !map->ctx_refs && !map->dma_handle_refs)
+		map->refs--;
+		if (!map->refs && !map->ctx_refs)
 			hlist_del_init(&map->hn);
 		if (map->refs > 0 && !flags)
 			return;
@@ -912,6 +902,9 @@ static int fastrpc_mmap_create(struct fastrpc_file *fl, int fd,
 				(unsigned int)map->attr);
 			map->refs = 2;
 		}
+		VERIFY(err, !IS_ERR_OR_NULL(map->buf = dma_buf_get(fd)));
+		if (err)
+			goto bail;
 		VERIFY(err, !IS_ERR_OR_NULL(map->handle =
 				ion_import_dma_buf_fd(fl->apps->client, fd)));
 		if (err)
@@ -942,9 +935,6 @@ static int fastrpc_mmap_create(struct fastrpc_file *fl, int fd,
 		if (map->attr & FASTRPC_ATTR_NOVA && !sess->smmu.coherent)
 			map->uncached = 1;
 
-		VERIFY(err, !IS_ERR_OR_NULL(map->buf = dma_buf_get(fd)));
-		if (err)
-			goto bail;
 		VERIFY(err, !IS_ERR_OR_NULL(map->attach =
 				dma_buf_attach(map->buf, sess->smmu.dev)));
 		if (err)
@@ -1558,7 +1548,7 @@ static int get_args(uint32_t kernel, struct smq_invoke_ctx *ctx)
 		VERIFY(err, !fastrpc_mmap_create(ctx->fl, ctx->fds[i],
 			FASTRPC_ATTR_NOVA, 0, 0, dmaflags, &ctx->maps[i]));
 		if (!err && ctx->maps[i])
-			ctx->maps[i]->dma_handle_refs++;
+			ctx->maps[i]->ctx_refs++;
 		if (err) {
 			for (j = bufs; j < i; j++) {
 				if (ctx->maps[j] &&
@@ -1848,10 +1838,9 @@ static int put_args(uint32_t kernel, struct smq_invoke_ctx *ctx,
 				break;
 			if (!fastrpc_mmap_find(ctx->fl, (int)fdlist[i], 0, 0,
 						0, 0, &mmap)) {
-				if (mmap && mmap->dma_handle_refs) {
-					mmap->dma_handle_refs = 0;
-					fastrpc_mmap_free(mmap, 0);
-				}
+				if (mmap && mmap->ctx_refs)
+					mmap->ctx_refs--;
+				fastrpc_mmap_free(mmap, 0);
 			}
 		}
 	}
